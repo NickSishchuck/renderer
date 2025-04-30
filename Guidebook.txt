@@ -1,0 +1,13 @@
+Build is for building things.
+
+src is for .cpp files.
+
+include is for .h files.
+
+To rebuild, cd into the build directory and run make.
+
+When CMakeLists.txt is updated: {
+cd build
+cmake ..
+cmake
+}
