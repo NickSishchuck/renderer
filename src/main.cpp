@@ -1,21 +1,24 @@
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-const char* vertexShaderSource = "#version 330 core \n"
-"layout (location = 0) in vec3 aPos; \n"
-"void main()\n"
-"{\n"
-"    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\n\0";
+// TODO: Make this a class
+std::string loadShaderFromFile(const char* filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open shader file: " << filename << std::endl;
+        return "";
+    }
 
-const char* fragmentShaderSource = "#version 330 core \n"
-"out vec4 FragColor; \n"
-"void main()\n"
-"{\n"
-"    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\n\0";
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    return buffer.str();
+}
 
 // Error callback for GLFW
 void errorCallback(int error, const char* description) {
@@ -87,13 +90,18 @@ int main() {
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
+    std::string vertexShaderSource = loadShaderFromFile("shaders/default.vert");
+    std::string fragmentShaderSource = loadShaderFromFile("shaders/default.frag");
+
     //GLuint is an OpenGL version for unsigned int
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    const char* vertexShaderCStr = vertexShaderSource.c_str();
+    glShaderSource(vertexShader, 1, &vertexShaderCStr, NULL);
     glCompileShader(vertexShader);
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    const char* fragmentShaderCStr = fragmentShaderSource.c_str();
+    glShaderSource(fragmentShader, 1, &fragmentShaderCStr, NULL);
     glCompileShader(fragmentShader);
 
     //wrapping our shaders into a so called shader program

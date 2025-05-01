@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(renderer)
+project(GLFWGLEWApp)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -13,8 +13,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Find the required packages
 find_package(OpenGL REQUIRED)
-
-# For some reason there's an error. It doesn't affect the build.
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 
@@ -33,16 +31,28 @@ target_link_libraries(${PROJECT_NAME}
     glfw
 )
 
+# Create shaders directory if it doesn't exist
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/shaders)
+
+# Copy shader files to build directory
+file(GLOB SHADER_FILES "${CMAKE_SOURCE_DIR}/shaders/*.glsl" "${CMAKE_SOURCE_DIR}/shaders/*.vert" "${CMAKE_SOURCE_DIR}/shaders/*.frag")
+if(SHADER_FILES)
+    file(COPY ${SHADER_FILES} DESTINATION "${CMAKE_BINARY_DIR}/shaders")
+endif()
+
+# Add a custom command to copy shaders when they change
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
+    COMMENT "Copying shaders to build directory"
+)
+
 # Optional: Print all include directories
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message(STATUS "Include directories:")
 foreach(dir ${dirs})
     message(STATUS "  ${dir}")
 endforeach()
-
-
-# Copy assets if needed
-# file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
-
 
 #Yes, I generated this file using Claude. Judge me for that.
