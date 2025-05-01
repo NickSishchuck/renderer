@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(GLFWGLEWApp)
+project(renderer)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -13,6 +13,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Find the required packages
 find_package(OpenGL REQUIRED)
+
+# For some reason there's an error. It doesn't affect the build.
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 
@@ -41,3 +43,6 @@ endforeach()
 
 # Copy assets if needed
 # file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
+
+
+#Yes, I generated this file using Claude. Judge me for that.
