@@ -3,23 +3,8 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <fstream>
-#include <sstream>
-#include <string>
 #include "../include/shaderClass.h"
 
-// TODO: Make this a class
-std::string loadShaderFromFile(const char* filename) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Failed to open shader file: " << filename << std::endl;
-        return "";
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
-}
 
 // Error callback for GLFW
 void errorCallback(int error, const char* description) {
