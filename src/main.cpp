@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "../include/shaderClass.h"
 
 // TODO: Make this a class
 std::string loadShaderFromFile(const char* filename) {
@@ -90,30 +91,6 @@ int main() {
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    std::string vertexShaderSource = loadShaderFromFile("shaders/default.vert");
-    std::string fragmentShaderSource = loadShaderFromFile("shaders/default.frag");
-
-    //GLuint is an OpenGL version for unsigned int
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const char* vertexShaderCStr = vertexShaderSource.c_str();
-    glShaderSource(vertexShader, 1, &vertexShaderCStr, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const char* fragmentShaderCStr = fragmentShaderSource.c_str();
-    glShaderSource(fragmentShader, 1, &fragmentShaderCStr, NULL);
-    glCompileShader(fragmentShader);
-
-    //wrapping our shaders into a so called shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-
-    glLinkProgram(shaderProgram);
-
-    //for some reason a guy in the guide told me that the shaders are already in the program, and we can delete them
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
    //Creating a buffer to send data between cpu and gpu
    // Vertex Array Object, Vertex Buffer Object, Element Buffer Object
@@ -138,13 +115,14 @@ int main() {
 
  glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+ Shader shader("default.vs", "default.fs");
  glEnableVertexAttribArray(0);
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         // Clear the screen
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shaderProgram);
+        shader.Activate();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
@@ -158,7 +136,7 @@ int main() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+    shader.Delete();
 
     glfwTerminate();
     return 0;

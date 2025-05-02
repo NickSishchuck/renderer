@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(GLFWGLEWApp)
+project(Renderer)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -22,7 +22,8 @@ message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 
 # Add executable
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/shaderClass.cpp)
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
