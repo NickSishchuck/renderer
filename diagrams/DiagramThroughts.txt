@@ -1,0 +1,1 @@
+Do I need to store the entity pos and forces in the MissileAI class?
