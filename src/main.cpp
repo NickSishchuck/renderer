@@ -5,6 +5,10 @@
 #include <GLFW/glfw3.h>
 #include "../include/shaderClass.h"
 
+#include "../include/VAO.h"
+#include "../include/VBO.h"
+#include "../include/EBO.h"
+
 
 // Error callback for GLFW
 void errorCallback(int error, const char* description) {
@@ -34,7 +38,7 @@ int main() {
         0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, //Lower right corner
         0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, //Upper corner
         -0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, //Inner left
-        0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, //Inner right
+        0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f, //Inner right:
         0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f // Inner down
     };
 
@@ -48,7 +52,7 @@ int main() {
 
 
     // Create a window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Basic renderer", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "Basic renderer", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -77,38 +81,25 @@ int main() {
     glViewport(0, 0, width, height);
 
 
-   //Creating a buffer to send data between cpu and gpu
-   // Vertex Array Object, Vertex Buffer Object, Element Buffer Object
-   GLuint VAO, VBO, EBO;
-
-
-   glGenVertexArrays(1, &VAO);
-   //creating a buffer object
-   //we only have 1 object to pass, so we type 1, then the address of the variable
-   glGenBuffers(1, &VBO);
-   glGenBuffers(1, &EBO);
-
-   glBindVertexArray(VAO);
-
-  // Binding in OpenGL is the way to make an object a *current* object
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
- glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
- glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
- glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-
- glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
  Shader shader("shaders/default.vert", "shaders/default.frag");
- glEnableVertexAttribArray(0);
+
+ VAO VAO1;
+ VAO1.Bind();
+
+ VBO VBO1(vertices, sizeof(vertices));
+ EBO EBO1(indices, sizeof(indices));
+
+ VAO1.LinkVBO(VBO1, 0);
+ VAO1.Unbind();
+ VBO1.Unbind();
+ EBO1.Unbind();
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         // Clear the screen
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         shader.Activate();
-        glBindVertexArray(VAO);
+        VAO1.Bind();
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
         // Swap buffers and poll events
@@ -118,9 +109,9 @@ int main() {
 
 
     // Clean up
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    VAO1.Delete();
+    VBO1.Delete();
+    EBO1.Delete();
     shader.Delete();
 
     glfwTerminate();

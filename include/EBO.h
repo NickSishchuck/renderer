@@ -1,15 +1,11 @@
-#ifndef VBO_CLASS_H
-#define VBO_CLASS_H
-
 #include <GL/eglew.h>
 
-class VBO{
+class EBO{
     public:
     GLuint ID;
-    VBO(GLfloat* vertices, GLsizeiptr size);
+    EBO(GLuint* indices, GLsizeiptr size);
 
     void Bind();
     void Unbind();
     void Delete();
 };
-#endif

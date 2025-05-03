@@ -22,8 +22,13 @@ message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 
 # Add executable
-add_executable(${PROJECT_NAME} src/main.cpp src/shaderClass.cpp)
-include_directories(${CMAKE_SOURCE_DIR}/src)
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+    src/shaderClass.cpp
+    src/EBO.cpp
+    src/VAO.cpp
+    src/VBO.cpp
+)
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}

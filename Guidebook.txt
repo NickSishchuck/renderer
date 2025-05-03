@@ -11,3 +11,9 @@ cd build
 cmake ..
 make
 }
+
+
+Seems like I still need to add src/ files manually to the ADD_EXECUTABLE command.
+I have another option, like using
+"file(GLOB SOURCES "src/*.cpp")
+add_executable(renderer ${SOURCES})" approach. But I would need to run "cmake .." and then "make" every time the code is updated.
