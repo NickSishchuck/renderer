@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 project(renderer)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)  # Increased to C++17 for std::filesystem
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Create logs directory
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/logs)
 
 # Find the required packages
 find_package(OpenGL REQUIRED)
@@ -17,18 +20,8 @@ message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 
-
 file(GLOB SOURCES "src/*.cpp")
 add_executable(renderer ${SOURCES})
-# Add executable
-#
-# add_executable(${PROJECT_NAME}
-#    src/main.cpp
-#    src/shaderClass.cpp
-#    src/EBO.cpp
-#    src/VAO.cpp
-#    src/VBO.cpp
-#)
 
 target_link_libraries(${PROJECT_NAME}
     OpenGL::GL
@@ -36,8 +29,10 @@ target_link_libraries(${PROJECT_NAME}
     glfw
 )
 
+# Create shaders directory
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/shaders)
 
+# Find and copy shader files
 file(GLOB SHADER_FILES
     "${CMAKE_SOURCE_DIR}/shaders/*.glsl"
     "${CMAKE_SOURCE_DIR}/shaders/*.vert"
@@ -60,5 +55,11 @@ message(STATUS "Include directories:")
 foreach(dir ${dirs})
     message(STATUS "  ${dir}")
 endforeach()
+
+# Create a log file for CMake output
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -E echo "CMake configuration completed at $(date)"
+    OUTPUT_FILE "${CMAKE_BINARY_DIR}/logs/cmake_config.log"
+)
 
 #Yes, I generated this file using Claude. Judge me for that.
