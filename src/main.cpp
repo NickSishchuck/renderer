@@ -17,6 +17,12 @@ void errorCallback(int error, const char* description) {
 int main() {
     // Initialize Logger first
     Logger* logger = Logger::getInstance();
+    logger->enableColors(true); // Enable colored output for Linux terminal
+
+    // Optional: Explicitly set the base path to strip from file paths
+    // This will be auto-detected if not set
+    // logger->setBasePath("/home/nick/Projects/CPP/Renderer/");
+
     if (!logger->init()) {
         std::cerr << "Failed to initialize logger!" << std::endl;
         return -1;

@@ -58,7 +58,7 @@ endforeach()
 
 # Create a log file for CMake output
 execute_process(
-    COMMAND ${CMAKE_COMMAND} -E echo "CMake configuration completed at $(date)"
+    COMMAND ${CMAKE_COMMAND} -E echo "CMake configuration completed at ${date}"
     OUTPUT_FILE "${CMAKE_BINARY_DIR}/logs/cmake_config.log"
 )
 

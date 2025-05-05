@@ -13,6 +13,7 @@ private:
     static Logger* instance;
     std::ofstream logFile;
     std::string logFileName;
+    std::string basePath;
     bool initialized;
 
     // Log level settings
@@ -29,6 +30,7 @@ private:
     // Display settings
     bool showTimestamps;
     bool showSourceInfo;
+    bool useColors;
 
     // Private constructor for singleton
     Logger();
@@ -55,6 +57,8 @@ public:
     void setLogLevel(LogLevel level);
     void enableTimestamps(bool enable);
     void enableSourceInfo(bool enable);
+    void enableColors(bool enable);
+    void setBasePath(const std::string& path);
 
     // Logging functions
     void debug(const std::string& message, const char* file = nullptr, int line = 0);
@@ -73,4 +77,4 @@ public:
 #define LOG_FATAL(msg) Logger::getInstance()->fatal(msg, __FILE__, __LINE__)
 #define LOG_TODO(msg) Logger::getInstance()->todo(msg, __FILE__, __LINE__)
 
-#endif // LOGGER_H
+#endif
