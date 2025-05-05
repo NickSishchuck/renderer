@@ -95,12 +95,17 @@ int main() {
  VAO1.Unbind();
  VBO1.Unbind();
  EBO1.Unbind();
+
+GLuint utiID = glGetUniformLocation(shader.ID, "scale");
+
     // Main loop
     while (!glfwWindowShouldClose(window)) {
         // Clear the screen
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         shader.Activate();
+        //TODO: make this a separate setting that is passed from a file
+        glUniform1f(utiID, 1.0f);//We can do that ONLY after activating our shader program
         VAO1.Bind();
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
