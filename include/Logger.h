@@ -32,7 +32,6 @@ private:
     bool showSourceInfo;
     bool useColors;
 
-    // Private constructor for singleton
     Logger();
 
     // Helper functions
@@ -47,10 +46,8 @@ public:
     // Singleton access
     static Logger* getInstance();
 
-    // Destructor
     ~Logger();
 
-    // Initialization
     bool init();
 
     // Settings functions

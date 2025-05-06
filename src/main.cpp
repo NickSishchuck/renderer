@@ -8,20 +8,22 @@
 #include "../include/VBO.h"
 #include "../include/EBO.h"
 #include "../include/Logger.h"
+#include "../include/ImGuiManager.h"
 
 // Error callback for GLFW
 void errorCallback(int error, const char* description) {
     LOG_ERROR(std::string("GLFW Error ") + std::to_string(error) + ": " + description);
 }
 
+// Handle window resize
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
 int main() {
     // Initialize Logger first
     Logger* logger = Logger::getInstance();
-    logger->enableColors(true); // Enable colored output for Linux terminal
-
-    // Optional: Explicitly set the base path to strip from file paths
-    // This will be auto-detected if not set
-    // logger->setBasePath("/home/nick/Projects/CPP/Renderer/");
+    logger->enableColors(true);
 
     if (!logger->init()) {
         std::cerr << "Failed to initialize logger!" << std::endl;
@@ -45,6 +47,37 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    // Create a window
+    LOG_INFO("Creating window...");
+    GLFWwindow* window = glfwCreateWindow(1300, 900, "ImGui OpenGL Renderer", nullptr, nullptr);
+    if (!window) {
+        LOG_FATAL("Failed to create GLFW window");
+        glfwTerminate();
+        return -1;
+    }
+
+    // Make the window's context current
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+
+    // Initialize GLEW
+    LOG_INFO("Initializing GLEW...");
+    glewExperimental = GL_TRUE; // Needed for core profile
+    if (GLenum err = glewInit() != GLEW_OK) {
+        LOG_FATAL(std::string("Failed to initialize GLEW: ") + (const char*)glewGetErrorString(err));
+        glfwTerminate();
+        return -1;
+    }
+
+    // Print OpenGL version
+    LOG_INFO(std::string("OpenGL Version: ") + (const char*)glGetString(GL_VERSION));
+    LOG_INFO(std::string("GLEW Version: ") + (const char*)glewGetString(GLEW_VERSION));
+    LOG_INFO(std::string("GLFW Version: ") + glfwGetVersionString());
+
+    // Setup ImGui
+    ImGuiManager imguiManager(window);
+    imguiManager.Initialize();
+
     //Triangle
     LOG_DEBUG("Creating vertex data...");
     GLfloat vertices[] =
@@ -64,38 +97,6 @@ int main() {
         5, 4, 1
     };
 
-    // Create a window
-    LOG_INFO("Creating window...");
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Basic renderer", nullptr, nullptr);
-    if (!window) {
-        LOG_FATAL("Failed to create GLFW window");
-        glfwTerminate();
-        return -1;
-    }
-
-    // Make the window's context current
-    glfwMakeContextCurrent(window);
-
-    // Initialize GLEW
-    LOG_INFO("Initializing GLEW...");
-    glewExperimental = GL_TRUE; // Needed for core profile
-    if (GLenum err = glewInit() != GLEW_OK) {
-        LOG_FATAL(std::string("Failed to initialize GLEW: ") + (const char*)glewGetErrorString(err));
-        glfwTerminate();
-        return -1;
-    }
-
-    // Print OpenGL version
-    LOG_INFO(std::string("OpenGL Version: ") + (const char*)glGetString(GL_VERSION));
-    LOG_INFO(std::string("GLEW Version: ") + (const char*)glewGetString(GLEW_VERSION));
-    LOG_INFO(std::string("GLFW Version: ") + glfwGetVersionString());
-
-    // Set viewport
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-    LOG_DEBUG("Viewport set to " + std::to_string(width) + "x" + std::to_string(height));
-
     LOG_INFO("Initializing shaders...");
     Shader shader("shaders/default.vert", "shaders/default.frag");
 
@@ -113,22 +114,67 @@ int main() {
     EBO1.Unbind();
 
     GLuint utiID = glGetUniformLocation(shader.ID, "scale");
-    LOG_TODO("Make scale a separate setting that is passed from a file");
+
+    // State variables
+    float scale = 1.0f;
+    float clearColor[4] = {0.2f, 0.3f, 0.3f, 1.0f};
+    bool showDemoWindow = false;
 
     // Main loop
     LOG_INFO("Entering main rendering loop");
     while (!glfwWindowShouldClose(window)) {
-        // Clear the screen
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // Poll events first
+        glfwPollEvents();
+
+        // 1. Render the scene to the backbuffer
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Make sure we're using the full window for rendering
+        int windowWidth, windowHeight;
+        glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+        glViewport(0, 0, windowWidth, windowHeight);
+
+        // Render the triangle directly to the backbuffer
         shader.Activate();
-        glUniform1f(utiID, 1.0f);//We can do that ONLY after activating our shader program
+        glUniform1f(utiID, scale);
         VAO1.Bind();
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
-        // Swap buffers and poll events
+        // 2. Now render ImGui on top
+        imguiManager.BeginFrame();
+
+        // Create a control window (floating over the scene)
+        {
+            // Position the controls in the top-left corner
+            ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_FirstUseEver);
+
+            ImGui::Begin("Controls");
+
+            ImGui::Text("Renderer Settings");
+            ImGui::SliderFloat("Scale", &scale, 0.1f, 2.0f);
+            ImGui::ColorEdit3("Background", clearColor);
+            ImGui::Checkbox("Show ImGui Demo Window", &showDemoWindow);
+
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                        1000.0f / ImGui::GetIO().Framerate,
+                        ImGui::GetIO().Framerate);
+
+            ImGui::End();
+
+            // Show the demo window if enabled
+            if (showDemoWindow) {
+                ImGui::ShowDemoWindow(&showDemoWindow);
+            }
+        }
+
+        // End ImGui frame and render it
+        imguiManager.EndFrame();
+        imguiManager.Render();
+
+        // Swap buffers
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
     // Clean up
@@ -137,6 +183,9 @@ int main() {
     VBO1.Delete();
     EBO1.Delete();
     shader.Delete();
+
+    // Shut down ImGui
+    imguiManager.Shutdown();
 
     glfwTerminate();
     LOG_INFO("Application terminated normally");

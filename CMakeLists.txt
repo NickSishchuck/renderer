@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
+# Check if ImGui exists, if not print an error
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/include/imgui/imgui.cpp")
+    message(FATAL_ERROR "ImGui not found.")
+endif()
+
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Create logs directory
@@ -20,8 +25,23 @@ message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 
+# Add ImGui source files
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/include/imgui)
+set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+# Include ImGui directories
+include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends)
+
 file(GLOB SOURCES "src/*.cpp")
-add_executable(renderer ${SOURCES})
+add_executable(renderer ${SOURCES} ${IMGUI_SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
     OpenGL::GL
@@ -58,8 +78,6 @@ endforeach()
 
 # Create a log file for CMake output
 execute_process(
-    COMMAND ${CMAKE_COMMAND} -E echo "CMake configuration completed at ${date}"
+    COMMAND ${CMAKE_COMMAND} -E echo "CMake configuration completed at ${DATE}"
     OUTPUT_FILE "${CMAKE_BINARY_DIR}/logs/cmake_config.log"
 )
-
-#Yes, I generated this file using Claude. Judge me for that.

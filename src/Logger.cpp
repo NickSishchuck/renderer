@@ -36,7 +36,7 @@ bool Logger::init() {
     // Create logs directory if it doesn't exist
     std::filesystem::create_directory("logs");
 
-    // Create log filename with the format DD_MM_YYYY_|_HH:MM
+    // Create log filename
     logFileName = createLogFileName();
 
     // Open log file
@@ -102,7 +102,6 @@ std::string Logger::getCurrentTimestamp() {
 
 std::string Logger::getLogLevelString(LogLevel level) {
     if (!useColors) {
-        // Plain text format
         switch (level) {
             case LogLevel::DEBUG:   return "[DEBUG]  ";
             case LogLevel::INFO:    return "[INFO]   ";
@@ -113,7 +112,7 @@ std::string Logger::getLogLevelString(LogLevel level) {
             default:                return "[UNKNOWN]";
         }
     } else {
-        // Colored format using ANSI escape codes
+        // Colored format using ANSI codes
         switch (level) {
             case LogLevel::DEBUG:   return "\033[36m[DEBUG]  \033[0m"; // Cyan
             case LogLevel::INFO:    return "\033[32m[INFO]   \033[0m"; // Green
