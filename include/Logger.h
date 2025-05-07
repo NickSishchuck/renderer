@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "GL/gl.h"
+
 class Logger {
 private:
     static Logger* instance;
@@ -64,6 +66,8 @@ public:
     void error(const std::string& message, const char* file = nullptr, int line = 0);
     void fatal(const std::string& message, const char* file = nullptr, int line = 0);
     void todo(const std::string& message, const char* file = nullptr, int line = 0);
+
+    std::string glErrorToString(GLenum error);
 };
 
 // Convenient macros for logging
@@ -73,5 +77,14 @@ public:
 #define LOG_ERROR(msg) Logger::getInstance()->error(msg, __FILE__, __LINE__)
 #define LOG_FATAL(msg) Logger::getInstance()->fatal(msg, __FILE__, __LINE__)
 #define LOG_TODO(msg) Logger::getInstance()->todo(msg, __FILE__, __LINE__)
+
+// Macro for OpenGL error logging
+#define LOG_GLERROR(context) { \
+    GLenum glErr = glGetError(); \
+    if (glErr != GL_NO_ERROR) { \
+        std::string errorMsg = std::string(context) + ": " + Logger::getInstance()->glErrorToString(glErr); \
+        Logger::getInstance()->error(errorMsg, __FILE__, __LINE__); \
+    } \
+}
 
 #endif
