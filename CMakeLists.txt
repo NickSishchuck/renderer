@@ -69,6 +69,13 @@ add_custom_command(
     COMMENT "Copying shaders to build directory"
 )
 
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/textures ${CMAKE_BINARY_DIR}/textures
+    COMMENT "Copying textures to build directory"
+)
+
 # Optional: Print all include directories
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message(STATUS "Include directories:")
