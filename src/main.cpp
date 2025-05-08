@@ -7,7 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>  // For translate, rotate, scale, perspective
 #include <glm/gtc/type_ptr.hpp>          // Optional: for value_ptr (useful when passing to OpenGL)
 
-#include "../include/stb_image.h"
 #include "../include/shaderClass.h"
 #include "../include/VAO.h"
 #include "../include/VBO.h"
@@ -84,25 +83,25 @@ int main() {
     ImGuiManager imguiManager(window);
     imguiManager.Initialize();
 
-    //Triangle
+    // Triangle - modified to remove texture coordinates
     LOG_DEBUG("Creating vertex data...");
     GLfloat vertices[] =
-    { //     COORDINATES        |     COLORS          |  TEXTURE COORDS
-        -0.5f,  0.0f, 0.5f,     1.0f, 0.0f, 0.0f,     0.0f, 0.0f,  // Lower left
-        -0.5f,  0.0f, -0.5f,     0.0f, 1.0f, 0.0f,     5.0f, 0.0f,  // Upper left
-         0.5f,  0.0f, -0.5f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f,  // Upper right
-         0.5f, 0.0f, 0.5f,     1.0f, 1.0f, 1.0f,     5.0f, 0.0f,   // Lower right
-         0.0f, 0.8f, 0.0f,      1.0f, 1.0f, 1.0f,   2.5f, 5.0f
+    { //     COORDINATES        |     COLORS
+        -0.5f,  0.0f,  0.5f,     1.0f, 0.0f, 0.0f,  // Lower left
+        -0.5f,  0.0f, -0.5f,     0.0f, 1.0f, 0.0f,  // Upper left
+         0.5f,  0.0f, -0.5f,     0.0f, 0.0f, 1.0f,  // Upper right
+         0.5f,  0.0f,  0.5f,     1.0f, 1.0f, 1.0f,  // Lower right
+         0.0f,  0.8f,  0.0f,     1.0f, 1.0f, 0.0f   // Top
     };
 
-    GLuint indices[] = // indices are the thing that define the order of vertices to draw
+    GLuint indices[] = // indices define the order of vertices to draw
     {
-        0,1,2,
-        0,2,3,
-        0,1,4,
-        1,2,4,
-        2,3,4,
-        3,0,4
+        0, 1, 2,
+        0, 2, 3,
+        0, 1, 4,
+        1, 2, 4,
+        2, 3, 4,
+        3, 0, 4
     };
 
     LOG_INFO("Initializing shaders...");
@@ -115,83 +114,23 @@ int main() {
     VBO VBO1(vertices, sizeof(vertices));
     EBO EBO1(indices, sizeof(indices));
 
-    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-    VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    // Updated attribute linking to remove texture coordinates
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
     VAO1.Unbind();
     VBO1.Unbind();
     EBO1.Unbind();
-
-
-
-    // Texture
-    stbi_set_flip_vertically_on_load(true);
-    int widthImage, heightImage, numColorChannels;
-    unsigned char* bytes = stbi_load("textures/pop_cat.jpg", &widthImage, &heightImage, &numColorChannels, 0);
-
-    if (bytes == NULL){
-        LOG_ERROR("Didn't load the texture");
-    } else {
-        LOG_INFO("Successfully loaded texture: " + std::to_string(widthImage) + "x" +
-        std::to_string(heightImage) + " with " + std::to_string(numColorChannels) + " channels");   }
-    GLuint texture;
-    glGenTextures(1, &texture);
-    LOG_GLERROR("Failed to generate texture");
-    // Check for OpenGL errors after generating texture
-    GLenum err = glGetError();
-
-    //Texture units are slots for textures. In each slot could be up to 16 textures
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    LOG_GLERROR("Failed to bind texture");
-
-    //First setting is what to choose if the image is scaled up?
-    //Nearest is pixel art
-    //Linear is blurry
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-    //Second setting is what to choose if the image is repeated
-    //GL_REPEAT
-    //GL_MIRRORED_REPEAT
-    //GL_CLAMP_TO_EDGE
-    //GL_CLAMP_TO_BORDER
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    //If we want to use clamp to border:
-    // float flatcolor[] = {R, G, B};
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatcolor);
-
-    //Generating our texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
-    //GL_RGB = For .jpeg
-    //GL_RGBA = For .png
-    LOG_GLERROR("Failed to load texture data");
-
-    glGenerateMipmap(GL_TEXTURE_2D); //Mipmap - smaller resolution versions of tha same texture, that are used when the texture is far away (for example)
-
-    //deleting, unbinding
-    stbi_image_free(bytes);
-    glBindTexture(GL_TEXTURE_2D,0);
-
-    GLuint tex0Uniform = glGetUniformLocation(shader.ID, "tex0");
-    shader.Activate();
-    glUniform1i(tex0Uniform, 0);
-
-
 
     // State variables
     float scale = 1.0f;
     float clearColor[4] = {0.2f, 0.3f, 0.3f, 1.0f};
     bool showDemoWindow = false;
 
-
     glEnable(GL_DEPTH_TEST);
 
     Camera camera(1300, 900, glm::vec3(0.0f, 0.0f, 2.0f));
+
     // Main loop
     LOG_INFO("Entering main rendering loop");
     while (!glfwWindowShouldClose(window)) {
@@ -207,15 +146,11 @@ int main() {
         glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
         glViewport(0, 0, windowWidth, windowHeight);
 
-
         // Render the triangle directly to the backbuffer
         shader.Activate();
 
         camera.Inputs(window);
         camera.Matrix(45.0f, 0.1f, 100.0f, shader, "camMatrix");
-
-        glBindTexture(GL_TEXTURE_2D, texture);
-
 
         VAO1.Bind();
         glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
@@ -262,7 +197,6 @@ int main() {
     VBO1.Delete();
     EBO1.Delete();
     shader.Delete();
-    glDeleteTextures(1,&texture);
 
     // Shut down ImGui
     imguiManager.Shutdown();
