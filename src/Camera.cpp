@@ -1,4 +1,7 @@
 #include "../include/Camera.h"
+#include <GLFW/glfw3.h>
+#include <cstdlib>
+
 
 
 
@@ -38,5 +41,38 @@ void Camera::Inputs(GLFWwindow* window){
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
         Position += speed * -Up;
+    }
+
+
+    //Mouse controls
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS){
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+        if (firstClick == true){
+
+            glfwSetCursorPos(window, (width / 2), (height / 2));
+            firstClick = false;
+        }
+        double mouseX;
+        double mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+
+
+        float rotx = sensitivity * (float)(mouseY-(height / 2)) / height;
+        float roty = sensitivity * (float)(mouseX-(width / 2)) / height;
+
+        glm::vec3 newOrientation = glm::rotate(Orientation, glm::radians(-rotx), glm::normalize(glm::cross(Orientation, Up)));
+
+        if (!((glm::angle(newOrientation, Up) <= glm::radians(5.0)) or glm::angle(newOrientation, -Up) <= glm::radians(5.0f))){
+            Orientation = newOrientation;
+        }
+
+        Orientation = glm::rotate(Orientation, glm::radians(-roty), Up);
+        glfwSetCursorPos(window, (width / 2), (height / 2));
+
+    } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE) {
+       glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+       firstClick == true;
     }
 }

@@ -54,7 +54,9 @@ int main() {
 
     // Create a window
     LOG_INFO("Creating window...");
-    GLFWwindow* window = glfwCreateWindow(1300, 900, "ImGui OpenGL Renderer", nullptr, nullptr);
+    float windowHeight = 1300;
+    float windowWidth = 900;
+    GLFWwindow* window = glfwCreateWindow(windowHeight, windowWidth, "ImGui OpenGL Renderer", nullptr, nullptr);
     if (!window) {
         LOG_FATAL("Failed to create GLFW window");
         glfwTerminate();
@@ -129,7 +131,7 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
-    Camera camera(1300, 900, glm::vec3(0.0f, 0.0f, 2.0f));
+    Camera camera(windowHeight, windowWidth, glm::vec3(0.0f, 0.0f, 2.0f));
 
     // Main loop
     LOG_INFO("Entering main rendering loop");
@@ -168,6 +170,7 @@ int main() {
 
             ImGui::Text("Renderer Settings");
             ImGui::SliderFloat("Speed", &camera.speed, 0.01f, 0.1f);
+            ImGui::SliderFloat("Sensitivity", &camera.sensitivity, 1.0f, 50.0f);
             ImGui::ColorEdit3("Background", clearColor);
             ImGui::Checkbox("Show ImGui Demo Window", &showDemoWindow);
 
