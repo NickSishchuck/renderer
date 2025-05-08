@@ -1,7 +1,11 @@
-#include <cmath>
-#include <iostream>
 #include <GL/glew.h>
+#include <glm/matrix.hpp>
+#include <iostream>
+#include <GL/gl.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>  // For translate, rotate, scale, perspective
+#include <glm/gtc/type_ptr.hpp>          // Optional: for value_ptr (useful when passing to OpenGL)
 
 #include "../include/stb_image.h"
 #include "../include/shaderClass.h"
@@ -82,17 +86,22 @@ int main() {
     //Triangle
     LOG_DEBUG("Creating vertex data...");
     GLfloat vertices[] =
-    { //        COORDINATES                   |    COLORS       |     COORDINATES
-        -0.5f, -0.5f, 0.0f,                   1.0f, 0.0f, 0.0f,     0.0f, 0.0f,  //Lower left
-        -0.5f, 0.5f, 0.0f,                    0.0f, 1.0f, 0.0f,     0.0f, 1.0f,  //Upper left
-        0.5f, 0.5f, 0.0f,                     0.0f, 0.0f, 1.0f,     1.0f, 1.0f,  //Upper right
-        0.5f, -0.5f, 0.0f,                    1.0f, 1.0f, 1.0f,     1.0f, 0.0f   //Lower right
+    { //     COORDINATES        |     COLORS          |  TEXTURE COORDS
+        -0.5f,  0.0f, 0.5f,     1.0f, 0.0f, 0.0f,     0.0f, 0.0f,  // Lower left
+        -0.5f,  0.0f, -0.5f,     0.0f, 1.0f, 0.0f,     5.0f, 0.0f,  // Upper left
+         0.5f,  0.0f, -0.5f,     0.0f, 0.0f, 1.0f,     0.0f, 0.0f,  // Upper right
+         0.5f, 0.0f, 0.5f,     1.0f, 1.0f, 1.0f,     5.0f, 0.0f,   // Lower right
+         0.0f, 0.8f, 0.0f,      1.0f, 1.0f, 1.0f,   2.5f, 5.0f
     };
 
     GLuint indices[] = // indices are the thing that define the order of vertices to draw
     {
-        0,2,1, //Upper triangle
-        0,3,2 //Lower triangle
+        0,1,2,
+        0,2,3,
+        0,1,4,
+        1,2,4,
+        2,3,4,
+        3,0,4
     };
 
     LOG_INFO("Initializing shaders...");
@@ -115,14 +124,15 @@ int main() {
     GLuint utiID = glGetUniformLocation(shader.ID, "scale");
 
     // Texture
+    stbi_set_flip_vertically_on_load(true);
     int widthImage, heightImage, numColorChannels;
     unsigned char* bytes = stbi_load("textures/pop_cat.jpg", &widthImage, &heightImage, &numColorChannels, 0);
 
-    if (bytes = NULL){
+    if (bytes == NULL){
         LOG_ERROR("Didn't load the texture");
     } else {
-        LOG_INFO("Sucsessfully loaded the texture");
-    }
+        LOG_INFO("Successfully loaded texture: " + std::to_string(widthImage) + "x" +
+        std::to_string(heightImage) + " with " + std::to_string(numColorChannels) + " channels");   }
     GLuint texture;
     glGenTextures(1, &texture);
     LOG_GLERROR("Failed to generate texture");
@@ -138,8 +148,8 @@ int main() {
     //First setting is what to choose if the image is scaled up?
     //Nearest is pixel art
     //Linear is blurry
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
     //Second setting is what to choose if the image is repeated
@@ -155,7 +165,7 @@ int main() {
     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatcolor);
 
     //Generating our texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
     //GL_RGB = For .jpeg
     //GL_RGBA = For .png
     LOG_GLERROR("Failed to load texture data");
@@ -177,6 +187,11 @@ int main() {
     float clearColor[4] = {0.2f, 0.3f, 0.3f, 1.0f};
     bool showDemoWindow = false;
 
+    float rotation = 0.0f;
+    double prevTime = glfwGetTime();
+
+
+    glEnable(GL_DEPTH_TEST);
     // Main loop
     LOG_INFO("Entering main rendering loop");
     while (!glfwWindowShouldClose(window)) {
@@ -192,14 +207,38 @@ int main() {
         glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
         glViewport(0, 0, windowWidth, windowHeight);
 
+
         // Render the triangle directly to the backbuffer
         shader.Activate();
+
+        double crntTime = glfwGetTime();
+        if (crntTime - prevTime >= 1 / 60){
+            rotation += 0.5f;
+            prevTime = crntTime;
+        }
+
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 proj = glm::mat4(1.0f);
+
+        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
+        proj = glm::perspective(glm::radians(45.0f), (float)(windowWidth / windowHeight), 0.1f, 100.0f);
+
+        int modelLoc = glGetUniformLocation(shader.ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        int viewLoc = glGetUniformLocation(shader.ID, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        int projLoc = glGetUniformLocation(shader.ID, "proj");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));
+
         glUniform1f(utiID, scale);
         glBindTexture(GL_TEXTURE_2D, texture);
 
 
         VAO1.Bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
 
         // 2. Now render ImGui on top
         imguiManager.BeginFrame();

@@ -20,6 +20,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/logs)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
