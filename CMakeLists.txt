@@ -42,7 +42,7 @@ set(IMGUI_SOURCES
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends)
 
 file(GLOB SOURCES "src/*.cpp")
-add_executable(renderer ${SOURCES} ${IMGUI_SOURCES})
+add_library(renderer STATIC ${SOURCES} ${IMGUI_SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
     OpenGL::GL
