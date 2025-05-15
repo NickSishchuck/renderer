@@ -29,6 +29,7 @@ message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 # Add ImGui source files
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui)
 set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.h
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_demo.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
@@ -40,6 +41,7 @@ set(IMGUI_SOURCES
 
 # Include ImGui directories
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends)
+
 
 file(GLOB SOURCES "src/*.cpp")
 add_library(renderer STATIC ${SOURCES} ${IMGUI_SOURCES})
