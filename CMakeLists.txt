@@ -27,7 +27,7 @@ message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 
 # Add ImGui source files
-set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui)
+set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/imGUI1)
 set(IMGUI_SOURCES
     ${IMGUI_DIR}/imgui.h
     ${IMGUI_DIR}/imgui.cpp
