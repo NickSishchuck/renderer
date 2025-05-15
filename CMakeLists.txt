@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Check if ImGui exists, if not print an error
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/include/imgui/imgui.cpp")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/imgui/imgui.cpp")
     message(FATAL_ERROR "ImGui not found.")
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Create logs directory
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/logs)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/logs)
 
 # Find the required packages
 find_package(OpenGL REQUIRED)
@@ -27,7 +27,7 @@ message(STATUS "GLEW libraries: ${GLEW_LIBRARIES}")
 message(STATUS "GLFW libraries: ${glfw3_LIBRARIES}")
 
 # Add ImGui source files
-set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/include/imgui)
+set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui)
 set(IMGUI_SOURCES
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_demo.cpp
@@ -51,22 +51,22 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # Create shaders directory
-file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/shaders)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
 
 # Find and copy shader files
 file(GLOB SHADER_FILES
-    "${CMAKE_SOURCE_DIR}/shaders/*.glsl"
-    "${CMAKE_SOURCE_DIR}/shaders/*.vert"
-    "${CMAKE_SOURCE_DIR}/shaders/*.frag")
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.glsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag")
 if(SHADER_FILES)
-    file(COPY ${SHADER_FILES} DESTINATION "${CMAKE_BINARY_DIR}/shaders")
+    file(COPY ${SHADER_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/shaders")
 endif()
 
 # Command to copy shaders when they change
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders
     COMMENT "Copying shaders to build directory"
 )
 
@@ -81,5 +81,5 @@ endforeach()
 # Create a log file for CMake output
 execute_process(
     COMMAND ${CMAKE_COMMAND} -E echo "CMake configuration completed at ${DATE}"
-    OUTPUT_FILE "${CMAKE_BINARY_DIR}/logs/cmake_config.log"
+    OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/logs/cmake_config.log"
 )
