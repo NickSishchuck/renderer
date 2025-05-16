@@ -4,8 +4,8 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>  // For translate, rotate, scale, perspective
-#include <glm/gtc/type_ptr.hpp>          // Optional: for value_ptr (useful when passing to OpenGL)
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../include/shaderClass.h"
 #include "../include/VAO.h"

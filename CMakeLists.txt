@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Check if ImGui exists, if not print an error
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/imgui/imgui.cpp")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/imGUI1/imgui.cpp")
     message(FATAL_ERROR "ImGui not found.")
 endif()
 
