@@ -1,4 +1,4 @@
-#include <GL/eglew.h>
+#include <GL/glew.h>
 
 class EBO{
     public:

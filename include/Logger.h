@@ -1,3 +1,9 @@
+#ifdef _WIN32
+    #include <windows.h>
+    #undef ERROR  // Remove Windows ERROR macro
+    #undef DEBUG  // Remove Windows DEBUG macro (if it exists)
+#endif
+
 #ifndef LOGGER_H
 #define LOGGER_H
 
