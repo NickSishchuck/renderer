@@ -17,8 +17,8 @@ void ImGuiManager::Initialize() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // Enable Multi-Viewport
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;    // Enable Multi-Viewport
+    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
 
 
     // Setup Dear ImGui style
