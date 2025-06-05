@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(renderer)
 
-set(CMAKE_CXX_STANDARD 17)  # Increased to C++17 for std::filesystem
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -73,7 +73,6 @@ add_custom_command(
 )
 
 
-# Optional: Print all include directories
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 message(STATUS "Include directories:")
 foreach(dir ${dirs})
