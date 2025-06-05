@@ -76,14 +76,28 @@ void Camera2D::CalculateView() {
 }
 
 void Camera2D::SetMatrices(Shader& shader) {
-    UpdateMatrices();
+    glm::mat4 projection = glm::ortho(
+        -200.0f, 200.0f,  // left, right (X range)
+        -250.0f, 400.0f,  // bottom, top (Y range)
+        -1.0f, 1.0f       // near, far (Z range for 2D)
+    );
 
-    shader.Activate();
+    glm::mat4 view = glm::mat4(1.0f); // Identity for 2D
 
-    // Send projection matrix
+    // Set uniforms
     GLuint projLoc = glGetUniformLocation(shader.ID, "projection2D");
-    glUniformMatrix3fv(projLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    GLuint viewLoc = glGetUniformLocation(shader.ID, "view2D");
+
+    if (projLoc != -1) {
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    }
+    if (viewLoc != -1) {
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    }
+
+    std::cout << "DEBUG: 2D Camera projection set to cover X:(-200,200) Y:(-250,400)" << std::endl;
 }
+
 
 glm::vec2 Camera2D::ScreenToWorld(const glm::vec2& screenPos) {
     // Convert screen coordinates to world coordinates

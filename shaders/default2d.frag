@@ -1,23 +1,21 @@
 #version 330 core
-out vec4 FragColor;
 
 in vec3 color;
 in vec2 texCoord;
 
+out vec4 FragColor;
+
 uniform int shapeType; // 0 = rectangle, 1 = circle
-uniform float smoothness; // For antialiasing
+uniform float smoothness;
 
-void main()
-{
-    if (shapeType == 1) { // Circle
-        // Distance from center (texCoord goes from -1 to 1)
+void main() {
+    if (shapeType == 1) {
+        // Circle rendering
         float dist = length(texCoord);
-
-        // Create smooth circle edge
         float alpha = 1.0 - smoothstep(1.0 - smoothness, 1.0, dist);
-
         FragColor = vec4(color, alpha);
-    } else { // Rectangle or other shapes
+    } else {
+        // Rectangle rendering
         FragColor = vec4(color, 1.0);
     }
 }
